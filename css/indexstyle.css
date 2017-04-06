@@ -1,0 +1,41 @@
+.foreground {
+    z-index: 10;
+}
+
+.searchform {
+    position: fixed;
+    top: 20px;
+    left: 100px;
+}
+
+#map {
+    z-index: 1;
+    position: absolute;
+}
+
+.ol-zoom {
+    position: absolute;
+    top: 28px;
+    left: 10px;
+    height: 34px;
+    width: 35px;
+}
+
+.marker {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #2B1604;
+    border-radius: 5px;
+    background-color: #FF7400;
+    opacity: 1;
+}
+
+#userposition {
+    width: 10px;
+    height: 10px;
+    border: 1px solid #2B1604;
+    border-radius: 5px;
+    background-color: #F00;
+    opacity: 0.5;
+}
+
