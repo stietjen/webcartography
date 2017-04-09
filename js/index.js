@@ -7,6 +7,7 @@ var lon;
 var map;
 var search;
 var restaurants;
+var zoom;
 
 $(document).ready(function () {
     windowAdapt();
@@ -32,14 +33,12 @@ $(document).ready(function () {
     map.addControl(new ol.control.Zoom());
     var options = {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 0
     };
     navigator.geolocation.getCurrentPosition(success, error, options); //https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition
     //console.log("lat: " + lat + " long: " + lon);
-    $('[data-toggle="popover"]').popover({
-        content: ''
-    });
+    $("[data-toggle = 'popover']").popover();
 });
 function windowAdapt() {
     $("#map").height($(window).height());
@@ -51,13 +50,14 @@ function success(pos) {
     lon = crd.longitude;
 
     map.getView().setCenter(ol.proj.fromLonLat([lon, lat]));
-    map.getView().setZoom(15);
+    zoom = map.getView().setZoom(15);
     var overpassApiUrl = createOverpassAPI();
     $.get(overpassApiUrl, function (feedbackData) {
         restaurants = osmtogeojson(feedbackData);
         console.log(restaurants);
         if (typeof restaurants !== null) {
             displayRestaurants();
+            displayInformation();
         }
     });
 };
@@ -74,64 +74,66 @@ function createOverpassAPI() {
     var query = '?data=[out:xml][timeout:25];(' + nodeQuery + wayQuery + relationQuery + ');out body;>;out skel qt;';
     var baseUrl = 'http://overpass-api.de/api/interpreter';
     return baseUrl + query;
-    console.log(restaurants);
 };
+
 function displayRestaurants() {
     console.log(restaurants);
     for (var i = 0; i < restaurants.features.length; i++) {
         var coordinates;
+        // TODO: warum 2
         if (restaurants.features[i].geometry.coordinates.length == 2) {
             var c = restaurants.features[i].geometry.coordinates;
             coordinates = ol.proj.fromLonLat([c[0], c[1]]);
+            console.log(coordinates);
         }
         else {
             var c = restaurants.features[i].geometry.coordinates[0][0];
             coordinates = ol.proj.fromLonLat([c[0], c[1]]);
+            console.log(coordinates);
         }
 
         // create button
         var place = restaurants.features[i].properties.id;
-        var a = document.createElement('a');
-        var type = document.createAttribute('type');
-        type.value = "a";
-        a.setAttributeNode(type);
+        var div= document.createElement('div');
+       /* var href = document.createAttribute('href');
+        href.value = "#";
+        div.setAttributeNode(href);*/
         var id = document.createAttribute('id');
         id.value = place;
-        a.setAttributeNode(id);
+        div.setAttributeNode(id);
         var role = document.createAttribute('role');
         role.value = "button";
-        a.setAttributeNode(role);
-        var tab = document.createAttribute('tabindex');
+        div.setAttributeNode(role);
+        var action = document.createAttribute('onclick');
+        action.value = '"'+ displayInformation() +'"';
+        div.setAttributeNode(action);
+        /*var tab = document.createAttribute('tabindex');
         tab.value = "";
-        a.setAttributeNode(tab);
+        div.setAttributeNode(tab);*/
         var pop = document.createAttribute('data-toggle');
         pop.value = "popover";
-        a.setAttributeNode(pop);
+        div.setAttributeNode(pop);
         var trigger = document.createAttribute('data-trigger');
-        trigger.value = "click";
-        a.setAttributeNode(trigger);
+        trigger.value = "hover";
+        div.setAttributeNode(trigger);
 
         //restaurant information
         var title = document.createAttribute('title');
         title.value = restaurants.features[i].properties.tags.name;
-        console.log(title.value);
-        a.setAttributeNode(title);
+        div.setAttributeNode(title);
         var content = document.createAttribute('data-content');
         content.value = restaurants.features[i].properties.tags.opening_hours + restaurants.features[i].properties.tags.phone;
-        console.log(content.value);
-        a.setAttributeNode(content);
-        var classAtt = document.createAttribute('class');
-        classAtt.value = " marker";
-        a.setAttributeNode(classAtt);
+        console.log(restaurants.features[i].properties.tags.cuisine);
+        div.setAttributeNode(content);
+        /*var classAtt = document.createAttribute('class');
+        classAtt.value = "popover popover-content";
+        div.setAttributeNode(classAtt);*/
 
-        /*var onclick = document.createAttribute('onclick');
-         onclick.value = alert("klicken funktioniert");
-         a.setAttributeNode(onclick);*/
-        var text = document.createTextNode("R");
-        a.appendChild(text);
+        var text = document.createTextNode("O");
+        div.appendChild(text);
 
         // display button
-        document.getElementById("popup").appendChild(a);
+        document.getElementById("marker").appendChild(div);
 
         //icon
         /*var span = document.createElement('span');
@@ -140,7 +142,7 @@ function displayRestaurants() {
          span.setAttributeNode(classIcon);
          document.getElementById(place).appendChild(span);*/
 
-        var marker = new ol.Overlay({ //http://openlayers.org/en/latest/examples/overlay.html
+       var marker = new ol.Overlay({ //http://openlayers.org/en/latest/examples/overlay.html
             position: coordinates,
             positioning: 'center-center',
             element: document.getElementById(restaurants.features[i].properties.id),
@@ -148,26 +150,53 @@ function displayRestaurants() {
         });
         map.addOverlay(marker);
 
-// restaurants without button function
-        /*var div = document.createElement('div');
-         var id = document.createAttribute('id');
-         id.value = "" + restaurants.features[i].properties.id + "";
-         div.setAttributeNode(id);
-         var classAtt = document.createAttribute('class');
-         classAtt.value = "marker";
-         div.setAttributeNode(classAtt);
-         document.getElementById("marker").appendChild(div);
-         var marker = new ol.Overlay({ //http://openlayers.org/en/latest/examples/overlay.html
-         position: coordinates,
-         positioning: 'center-center',
-         element: document.getElementById(restaurants.features[i].properties.id),
-         stopEvent: false
-         });
-         map.addOverlay(marker);*/
 
-    }
-    ;
+       /* var popup = new ol.Overlay({
+            position: coordinates,
+            element: document.getElementById("popover")
+            //element: $('<div id="popup"><b><a href="#" data-toggle="popover" title="Testtitel" data-content="I hope there is something to read">O</a></b></div>')[0],
+        });
+        map.addOverlay(popup);*/
+       /* var popup = new ol.Overlay({
+            position: coordinates,
+            element: document.getElementById(restaurants.features[i].properties.id)
+        });
+        popup.on('click', function() {
+            var element = document.getElementById(restaurants.features[i].properties.id);
+            var name = restaurants.features[i].properties.tags.name;
+            var open = restaurants.features[i].properties.tags.opening_hours;
+
+            $(element).popover('destroy');
+            popup.setPosition(coordinates);
+            // the keys are quoted to prevent renaming in ADVANCED mode.
+            $(element).popover({
+                'placement': 'top',
+                'animation': false,
+                'html': true,
+                'content': name + '<br><p>Opening Hours:</p>' + open
+            });
+            $(element).popover('show');
+        });
+        map.addOverlay(popup);*/
+
 };
+
+function displayInformation() {
+    document.getElementById("restaurantInfo").innerHTML = restaurants.features[i].properties.tags.name;
+};
+
+function displayCuisineChoice() {
+    var choice = document.getElementById("cuisines").value;
+    //console.log(choice);
+
+    for (var i = 0; i < restaurants.features.length; i++) {
+        if (restaurants.features[i].properties.tags.cuisine == choice) {
+        }
+       // map.removeOverlay(marker);
+        displayRestaurants();
+    }
+}
+}
 /*function restaurantButton() {
 
  };*/

@@ -16,19 +16,38 @@
 <body>
 
 <div id="map">
+    <div class="menu">
+        <div class="form-group">
+            <select id="cuisines" onchange="displayCuisineChoice()">
+                <option value="default">Choose cuisine</option>
+                <option value="regional">Regional</option>
+                <option value="polish">Polish</option>
+                <option value="french">French</option>
+                <option value="italian">Italian</option>
+                <option value="greek">Greek</option>
+                <option value="turkish">Turkish</option>
+                <option value="viet">Vietnamese</option>
+                <option value="indian">Indian</option>
+                <option value="thai">Thai</option>
+                <option value="pakistani">Pakistani</option>
+                <option value="syrian">Syrian</option>
+                <option value="korean">Korean</option>
+                <option value="chinese">Chinese</option>
+                <option value="american">American</option>
+            </select>
+        </div>
+        <div id="restaurantInfo" class="container">
 
-    <!-- Hier kommt die Karte rein -->
+        </div>
+
+    <form class="navbar-form navbar-left foreground searchform" role="search">
+        <div  class="container">
+            <a href="#" onclick="displayRestaurants();" title="Popover Header" data-content="Some content inside the popover">Toggle popover</a>
+        </div>
+    </form>
+    <div id="marker" title="Marker"></div>
+    <div id="popover" title="Popup" class="popover popover-content"></div>
 </div>
-<form class="navbar-form navbar-left foreground searchform" role="search">
-    <div class="form-group">
-        <input type="text" id="navBar" class="form-control" placeholder="Search">
-        <button type="button" id="navButton" class="btn btn-default">Submit</button>
-    </div>
-</form>
-<div id="marker" title="Marker"></div>
-<div id="popup" title="Popup" class="popover popover-content"></div>
-<div id="sidebar">
-    <!-- Hier kommt die Sidebar -->
 </div>
 </body>
 </html>

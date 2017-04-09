@@ -28,6 +28,11 @@
     border-radius: 5px;
     background-color: #FF7400;
     opacity: 1;
+    z-index: 10;
+}
+
+.popover{
+    min-width: 180px;
 }
 
 #userposition {
@@ -38,4 +43,22 @@
     background-color: #F00;
     opacity: 0.5;
 }
+/* MENU */
+#toggle-menu {
+    margin: 2px;
+    z-index: 10;
+}
 
+.menu {
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    right: 0px;
+    z-index: 10;
+    background: #FF7400;
+}
+
+.menu > .container {
+    width: 300px;
+    padding-top: 50px;
+}
